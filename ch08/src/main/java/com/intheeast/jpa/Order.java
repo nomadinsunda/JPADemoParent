@@ -18,7 +18,7 @@ public class Order {
 
     private String customer;
 
-    // mappedBy : 관계의 owner[주인]를 정의하는 필드. 관계가 양방향인 경우 필수.
+    // mappedBy : 관계의 owner[주인]를 정의하는 필드 또한 inverse side 결정. 관계가 양방향인 경우 필수.
     // 그러므로, 이 양방향 관계의 주인은 OrderItem.order.
     // 외래키를 가지고 있는 엔티티 클래스가 주인.
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

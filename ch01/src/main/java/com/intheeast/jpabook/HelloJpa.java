@@ -25,6 +25,7 @@ public class HelloJpa {
             member.setId(1L); // 수동으로 직접 ID[프라이머리 키]의 값을 설정
             member.setName("John");
             
+            //em.
             
             em.persist(member);  // INSERT 발생
 

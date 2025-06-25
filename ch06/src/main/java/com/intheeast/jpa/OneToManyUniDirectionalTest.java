@@ -5,7 +5,7 @@ import java.util.List;
 import javax.persistence.*;
 
 
-public class OrderTest {
+public class OneToManyUniDirectionalTest {
 	private static final EntityManagerFactory emf = 
 	        Persistence.createEntityManagerFactory("hello");
 
@@ -66,7 +66,7 @@ public class OrderTest {
              values(default, ?, ?)
         */
         // flush 메서드 호출하기 전에 이미 위 쿼리들이 실행됨:
-        // -영속성 전이(CascadeType.ALL) 에 의해 OrderItem까지 persist 전파됨
+        // -영속성 전이(CascadeType.ALL)에 의해 OrderItem까지 persist 전파됨
         // -단방향 @OneToMany + @JoinColumn 매핑이기 때문에,
         //  JPA는 flush 타이밍을 em.persist()에 즉시 수행함
         // 즉시 insert가 필요한 이유:

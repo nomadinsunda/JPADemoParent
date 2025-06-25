@@ -3,7 +3,7 @@ package com.intheeast.jpa;
 import java.util.List;
 import javax.persistence.*;
 
-public class ManyToOneTest {
+public class ManyToOneUniDirectionalTest {
 
     private static final EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("hello");

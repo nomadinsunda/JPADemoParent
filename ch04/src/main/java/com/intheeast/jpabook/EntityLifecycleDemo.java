@@ -20,7 +20,7 @@ public class EntityLifecycleDemo {
 
             // 🔹 SELECT 테스트 (1차 캐시 제거 후 PostLoad 테스트)
             em.flush();
-            em.clear();
+            em.clear(); // 1차 캐시 전체를 클리어!!!,
             em.find(Member.class, 1L); // → @PostLoad 실행됨
 
             // 🔹 DELETE 테스트
