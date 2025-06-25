@@ -3,6 +3,8 @@ package com.intheeast.jpabook;
 import javax.persistence.*;
 
 public class HelloJpa {
+	
+	
 
     public static void main(String[] args) {
         // 1. EntityManagerFactory 생성 (persistence.xml에 정의된 이름 사용)
@@ -18,10 +20,12 @@ public class HelloJpa {
         try {
             tx.begin();  // 트랜잭션 시작
 
-            // === 저장 ===
+            // === 저장 === : transient : 비영속 : 엔티티 매니저가 관리를 하고 있지 않음.
             Member member = new Member();
-            member.setId(1L);
+            member.setId(1L); // 수동으로 직접 ID[프라이머리 키]의 값을 설정
             member.setName("John");
+            
+            
             em.persist(member);  // INSERT 발생
 
             // === 조회 ===

@@ -3,8 +3,6 @@
 
     <persistence-unit name="hello">
 
-		<!-- <class>com.intheeast.jpabook.Member</class> -->
-		
         <properties>
 
             <!-- 필수 속성 -->
