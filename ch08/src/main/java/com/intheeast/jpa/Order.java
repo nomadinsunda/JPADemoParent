@@ -46,7 +46,7 @@ public class Order {
     public void addItem(OrderItem item) {
         orderItems.add(item);
         ///////////////////////////////////////
-        item.setOrder(this); // 연관관계 주인 쪽 설정
+        item.setOrder(this); // 연관관계 주인 쪽 설정 : 이 설정을 하지 않으면, OrderItem의 ORDER_ID가 NULL 설정됨.
         ///////////////////////////////////////
     }
     

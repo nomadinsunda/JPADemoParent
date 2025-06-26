@@ -13,13 +13,13 @@ public class BiDirectionalTest {
 
     public static void main(String[] args) {
 //        initData();                // 초기 데이터 저장
-//    	List<Long> gotData = initData2();
-//    	initData3();
+//    	persistChildWhileParentIsTransient();
 //    	persistWithoutConvenienceMethod();
-//    	initWithoutConvenienceMethod();
-//        checkDataConsistency();
-//    	printTeamNamesForMemberIds(gotData);
-//        testLazyLoading();        // 지연 로딩 확인
+//    	initWithoutSettingInverseSide();
+//        checkOrderLazyFetching();
+//    	List<Long> listIds = prepareOrderItemsForPrint();
+//    	printTeamNamesForMemberIds(listIds);
+    	
 //        testOrphanRemoval();      // 고아 객체 삭제 확인
 //        testChangeRelation();     // 연관관계 변경 확인
 //        testNPlusOne();           // N+1 문제 확인
@@ -29,15 +29,21 @@ public class BiDirectionalTest {
 //        updateOrderItems();
 //        removeAndReAdd();
     	
-    	initTestData();
-    	printItem();
+//    	initTestData();
+//    	printItem();
 //    	selectiveUpdateItem();
 //    	conditionalDeleteItem();
 //    	appendNewItems();
+    	
+    	List<Long> listIds = prepareOrderItemsForPrint();
+//    	addMoreOrderItemsToExistingOrders();
+//    	verifyOrderItemsInDatabase();
+    	
+    	deleteOrderAndCascadeItems("디자인팀");
         emf.close();
     }
 
-    // 🔸 초기 데이터 저장
+    // 정상적인 부모 자식 관계 설정과 cascade 시연
     private static void initData() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -46,7 +52,6 @@ public class BiDirectionalTest {
             tx.begin();
 
             Order order = new Order("이순신");
-//            em.persist(order); // 영속성 상태가 아님
             
             order.addItem(new OrderItem("모니터", 2));
             order.addItem(new OrderItem("마우스", 1));
@@ -64,7 +69,8 @@ public class BiDirectionalTest {
         }
     }
     
-    private static List<Long> initData2() {
+    // 부모 엔티티가 아직 영속화되지 않았는데 자식 엔티티를 먼저 persist()하면 문제가 발생함
+    private static List<Long> persistChildWhileParentIsTransient() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
@@ -90,7 +96,8 @@ public class BiDirectionalTest {
         return retOrderItemIds;
     }
     
-    private static List<Long> initData3() {
+    // 연관관계를 설정하기 전에 먼저 저장하는 잘못된 코드
+    private static List<Long> persistEntitiesBeforeSettingRelationship() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
@@ -102,11 +109,10 @@ public class BiDirectionalTest {
             OrderItem item2 = new OrderItem("마우스", 1);
 
             Order order = new Order("이순신"); 
-            // flush를 하지 않아도 곧바로 insert 쿼리가 전송
-            em.persist(order); // 바로 insert 쿼리가 전송
+            em.persist(order); 
             
-            em.persist(item1); // 바로 insert 쿼리가 전송
-            em.persist(item2); // 바로 insert 쿼리가 전송
+            em.persist(item1); 
+            em.persist(item2); 
             
             item1.setOrder(order);
             item2.setOrder(order);
@@ -118,9 +124,7 @@ public class BiDirectionalTest {
             
             List<Long> orderItemIds = new ArrayList<>();
             orderItemIds.add(item1.getId());
-            //////////////////////////////////
-            // item1.getId를 호출함으로써, orderItemIds에는 [1, 1]라는
-            // 동일한 엘리먼트를 가지고 있었음
+            
             orderItemIds.add(item2.getId());
             
             retOrderItemIds = orderItemIds;
@@ -129,8 +133,7 @@ public class BiDirectionalTest {
             em.clear();
 
             OrderItem gotOrderItem = em.find(OrderItem.class, orderItemIds.get(0));
-            System.out.println(gotOrderItem.toString());
-            
+            System.out.println(gotOrderItem.toString());            
 
             tx.commit();
         } finally {
@@ -140,6 +143,7 @@ public class BiDirectionalTest {
         return retOrderItemIds;
     }
     
+    // FK 미설정 문제 발생
     private static void persistWithoutConvenienceMethod() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -152,11 +156,10 @@ public class BiDirectionalTest {
             OrderItem item1 = new OrderItem("SSD", 1);
             OrderItem item2 = new OrderItem("RAM", 2);
 
-            // 주인 쪽 관계 미설정
             order.getOrderItems().add(item1);
             order.getOrderItems().add(item2);
 
-            // order 설정하지 않음
+            // 주인 쪽 관계 미설정
             // item1.setOrder(order); 
             // item2.setOrder(order);
 
@@ -171,7 +174,8 @@ public class BiDirectionalTest {
         }
     }
     
-    private static void initWithoutConvenienceMethod() {
+    // DB은 참조 관계가 설정되었지만, 객체 그래프가 불완전하게 구성됨
+    private static void initWithoutSettingInverseSide() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
@@ -182,55 +186,104 @@ public class BiDirectionalTest {
 
             OrderItem item = new OrderItem("진라면", 1);
 
-            // setOrder 호출로 연관관계 주인 필드만 설정
+            // 연관관계 주인만 설정 (비주인 역방향은 설정하지 않음)
             item.setOrder(order);
 
-            // order.getOrderItems().add(item); 는 생략 (역방향 미설정)
+            // ❌ order.getOrderItems().add(item); 는 생략됨
 
             em.persist(order); 
             em.persist(item);
+            
+            em.flush();
+
+            // 🎯 객체 그래프 출력: 비어있음 확인
+            System.out.println("📦 Order 객체 내의 orderItems 크기: " + order.getOrderItems().size()); // 0
+            for (OrderItem oi : order.getOrderItems()) {
+                System.out.println("   ↳ 자식 아이템: " + oi);
+            }
 
             tx.commit();
-
         } finally {
             em.close();
         }
     }
 
-    // 저장된 데이터를 읽어들이며 불일치 확인
-    private static void checkDataConsistency() {
+
+    private static void checkOrderLazyFetching() {
         EntityManager em = emf.createEntityManager();
 
         try {
-            Order order = em.find(Order.class, 1L);
-            System.out.println(" Order 객체 조회: " + order);
-            System.out.println(" 포함된 OrderItem 목록: " + order.getOrderItems());
+            System.out.println("\n=== 1️⃣ OrderItem 객체만 조회 ===");
+            OrderItem item = em.find(OrderItem.class, 1L); // Order는 아직 로딩되지 않음
+            System.out.println("🛒 item.getProduct() = " + item.getProduct());
 
-            OrderItem item = em.find(OrderItem.class, 1L);
-            System.out.println(" OrderItem 객체 조회: " + item);
-            System.out.println(" item.getOrder(): " + item.getOrder());
+            System.out.println("\n=== 2️⃣ item.getOrder() 호출 전 LAZY 상태 확인 ===");
+            PersistenceUnitUtil util = emf.getPersistenceUnitUtil();
+            boolean isOrderLoaded = util.isLoaded(item, "order");
+            System.out.println("👀 isLoaded(item, \"order\"): " + isOrderLoaded); // false expected
+
+            System.out.println("\n=== 3️⃣ item.getOrder() 호출 (지연 로딩 발생 지점) ===");
+            Order order = item.getOrder(); // 여기서 SELECT 발생
+            System.out.println("📦 order.getCustomer() = " + order.getCustomer());
+
+            System.out.println("\n=== 4️⃣ 호출 후 LAZY 초기화 여부 재확인 ===");
+            boolean isOrderLoadedAfter = util.isLoaded(item, "order");
+            System.out.println("✅ isLoaded(item, \"order\") after access: " + isOrderLoadedAfter); // true expected
 
         } finally {
             em.close();
         }
     }
-    
+
+    public static List<Long> prepareOrderItemsForPrint() {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        List<Long> orderItemIds = new ArrayList<>();
+        
+        try {
+            tx.begin();
+
+            Order order1 = new Order("개발팀");
+            Order order2 = new Order("디자인팀");
+
+            OrderItem item1 = new OrderItem("노트북", 1);
+            OrderItem item2 = new OrderItem("모니터", 2);
+            OrderItem item3 = new OrderItem("키보드", 3);
+            OrderItem item4 = new OrderItem("태블릿", 1);
+
+            // 연관관계 설정 (편의 메서드 사용)
+            order1.addItem(item1);
+            order1.addItem(item2);
+            order2.addItem(item3);
+            order2.addItem(item4);
+
+            // Cascade 설정 덕분에 Order만 persist해도 OrderItem들도 자동 저장됨
+            em.persist(order1);
+            em.persist(order2);
+
+            tx.commit();
+
+            // 트랜잭션 종료 후 ID를 추출
+            orderItemIds.add(item1.getId());
+            orderItemIds.add(item2.getId());
+            orderItemIds.add(item3.getId());
+            orderItemIds.add(item4.getId());
+
+        } finally {
+            em.close();
+        }
+
+        return orderItemIds;
+    }
+
+    // JPA는 양방향 연관관계를 자동으로 역추적하지 않음
     public static void printTeamNamesForMemberIds(List<Long> orderItemIds) {
 
     	System.out.println("printTeamNamesForMemberIds");
     	EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         
-        List<OrderItem> items = em.createQuery("Select o from OrderItem o", OrderItem.class)
-        		.getResultList();
-        
-        for (OrderItem item : items) {
-        	System.out.println("###############################################3");
-        	Order order = item.getOrder();
-        	System.out.println("###############################################3");
-        	System.out.println(order);
-        }
-
         try {
             tx.begin();
 	
@@ -271,11 +324,15 @@ public class BiDirectionalTest {
 	
 	        System.out.println("***************************************************");
 	
+	        
 	        for (Order order : orders) {
 	            System.out.printf("팀 이름:%s", order.getCustomer());
 	            System.out.println("\n");
 	
 	            ////////////////////////////////////////////////////////
+	            // 이미 1차 캐시에 OrderItem 엔티티 클래스 인스턴스가 있는데도 Select 쿼리 나감.
+	            // :1차 캐시는 엔티티 단위로만 존재할 뿐, 객체 그래프까지 자동 연결하지는 않음
+	            //  즉, JPA는 양방향 연관관계를 자동으로 역추적하지 않습니다
 	            for (OrderItem orderItem : order.getOrderItems()) {
 	                System.out.printf("          멤버 ID:%d, 멤버 이름:%S", orderItem.getId(), orderItem.getProduct());
 	                System.out.println("\n");
@@ -292,31 +349,7 @@ public class BiDirectionalTest {
 
     }
 
-    // 🔸 지연 로딩 확인
-    private static void testLazyLoading() {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-
-        try {
-            tx.begin();
-            System.out.println("\n🧪 [지연 로딩 테스트]");
-
-            Order order = em.createQuery("select o from Order o", Order.class)
-                            .setMaxResults(1)
-                            .getSingleResult();
-
-            System.out.println("📦 주문자: " + order.getCustomer());
-            System.out.println("📦 주문 항목 조회 전 (SQL X)");
-
-            for (OrderItem item : order.getOrderItems()) {
-                System.out.println(" - " + item.getProduct() + " x " + item.getQuantity());
-            }
-
-            tx.commit();
-        } finally {
-            em.close();
-        }
-    }
+    
 
     // 🔸 고아 객체 제거 확인
     private static void testOrphanRemoval() {
@@ -583,5 +616,112 @@ public class BiDirectionalTest {
             em.close();
         }
     }
+    
+    public static void addMoreOrderItemsToExistingOrders() {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            // 기존 Order 엔티티 조회 (이름으로 조회 또는 ID 기반으로 해도 됨)
+            TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", Order.class);
+            Order devTeam = query.setParameter("name", "개발팀").getSingleResult();
+            Order designTeam = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", Order.class)
+                                  .setParameter("name", "디자인팀")
+                                  .getSingleResult();
+
+            // 새로운 OrderItem 추가
+            OrderItem item5 = new OrderItem("외장하드", 1);
+            OrderItem item6 = new OrderItem("HDMI 케이블", 5);
+            OrderItem item7 = new OrderItem("그래픽 태블릿", 1);
+            OrderItem item8 = new OrderItem("펜촉 세트", 10);
+
+            // 연관관계 설정 (편의 메서드 사용)
+            devTeam.addItem(item5);
+            devTeam.addItem(item6);
+            designTeam.addItem(item7);
+            designTeam.addItem(item8);
+
+            // cascade 설정으로 인해 Order만 merge/persist하면 자식도 반영됨
+            em.persist(devTeam);
+            em.persist(designTeam);
+
+            tx.commit();
+            System.out.println("✅ 기존 Order에 새로운 OrderItem 추가 완료");
+
+        } catch (Exception e) {
+            tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public static void verifyOrderItemsInDatabase() {
+        EntityManager em = emf.createEntityManager();
+        
+        try {
+            List<Order> orders = em.createQuery("SELECT o FROM Order o", Order.class)
+                                   .getResultList();
+
+            System.out.println("📦 전체 Order 및 그에 속한 OrderItem 목록 출력");
+            for (Order order : orders) {
+                System.out.println("--------------------------------------------------");
+                System.out.printf("🧑 팀 이름: %s (Order ID: %d)%n", order.getCustomer(), order.getId());
+
+                List<OrderItem> items = order.getOrderItems(); // LAZY일 경우 이 시점에 SELECT 발생
+                System.out.printf("📦 포함된 OrderItem 수: %d%n", items.size());
+
+                for (OrderItem item : items) {
+                    System.out.printf("   - ID: %d, 상품명: %s, 수량: %d%n",
+                            item.getId(), item.getProduct(), item.getQuantity());
+                }
+            }
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public static void deleteOrderAndCascadeItems(String customerName) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            // 삭제 대상 Order 조회
+            Order order = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", Order.class)
+                            .setParameter("name", customerName)
+                            .getSingleResult();
+
+            Long orderId = order.getId();
+
+            // 로그: 삭제 전 상태 출력
+            System.out.printf("🗑 삭제할 Order: %s (ID: %d), 자식 개수: %d%n", order.getCustomer(), orderId, order.getOrderItems().size());
+
+            // 부모 삭제 → 자식도 cascade + orphanRemoval에 의해 자동 삭제됨
+            em.remove(order);
+
+            tx.commit();
+            System.out.println("✅ Order 및 관련된 OrderItem 삭제 완료");
+
+            // 삭제 후 확인
+            em = emf.createEntityManager(); // 새 EntityManager로 쿼리 실행
+            Long count = em.createQuery("SELECT COUNT(o) FROM OrderItem o WHERE o.order.id = :orderId", Long.class)
+                           .setParameter("orderId", orderId)
+                           .getSingleResult();
+
+            System.out.printf("🔍 삭제 이후, 해당 Order에 속한 OrderItem 개수: %d%n", count);
+
+        } catch (NoResultException e) {
+            System.out.println("해당 이름의 Order가 존재하지 않습니다.");
+        } finally {
+            em.close();
+        }
+    }
+
+
 
 }

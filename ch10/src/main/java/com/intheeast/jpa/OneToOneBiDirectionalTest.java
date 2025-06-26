@@ -2,7 +2,7 @@ package com.intheeast.jpa;
 
 import javax.persistence.*;
 
-public class OneToOneUniDirectionalTest {
+public class OneToOneBiDirectionalTest {
 
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
 
