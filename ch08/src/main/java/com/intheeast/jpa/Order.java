@@ -7,35 +7,57 @@ import java.util.*;
 
 @Entity
 @Table(name = "ORDERS")
-@Getter
+@SequenceGenerator(
+	    name = "order_seq_generator",
+	    sequenceName = "order_seq", // DB 시퀀스 이름
+	    initialValue = 1,
+	    allocationSize = 100
+	)
+//@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(exclude = "orderItems")
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, 
+	generator = "order_seq_generator")
     private Long id;
 
     private String customer;
 
-    // mappedBy : 관계의 owner[주인]를 정의하는 필드 또한 inverse side 결정. 관계가 양방향인 경우 필수.
-    // 그러므로, 이 양방향 관계의 주인은 OrderItem.order.
-    // 외래키를 가지고 있는 엔티티 클래스가 주인.
+    // mappedBy 속성을 설정했다는 것은 
+    // 내가 owner가 아니라 owner의 반대편(inverse side)이다.
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order(String customer) {
         this.customer = customer;
     }
+    
+    public Long getId() {
+    	return this.id;
+    }
+    
+    public List<OrderItem> getOrderItems() {
+    	return this.orderItems;
+    }
 
-    // 연관관계 편의 메서드
+    // 연관관계 편의 메서드(inverse side에서 정의함)
     public void addItem(OrderItem item) {
         orderItems.add(item);
+        ///////////////////////////////////////
         item.setOrder(this); // 연관관계 주인 쪽 설정
+        ///////////////////////////////////////
+    }
+    
+    public String getCustomer() {
+    	return this.customer;
     }
 
     public void removeItem(OrderItem item) {
         orderItems.remove(item);
+        ///////////////////////
         item.setOrder(null);
+        /////////////////////////
     }
 }

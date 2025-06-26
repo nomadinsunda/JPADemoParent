@@ -13,9 +13,14 @@ public class AutoStrategyDemo {
 
         try {
             tx.begin();
-            AutoMember m = new AutoMember("도윤");
-            em.persist(m);
-            System.out.println("🌱 생성된 ID (AUTO): " + m.getId());
+            AutoMember m1 = new AutoMember("도윤");
+            AutoMember m2 = new AutoMember("지윤");
+            em.persist(m1);
+            em.persist(m2);
+
+            System.out.println("🌱 m1 : 생성된 ID (AUTO): " + m1.getId());
+            System.out.println("🌱 m2 : 생성된 ID (AUTO): " + m2.getId());
+
             tx.commit();
         } finally {
             em.close();

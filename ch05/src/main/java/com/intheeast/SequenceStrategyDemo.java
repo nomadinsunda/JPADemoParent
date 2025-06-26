@@ -10,9 +10,13 @@ public class SequenceStrategyDemo {
 
         try {
             tx.begin();
-            SequenceMember m = new SequenceMember("영희");
-            em.persist(m);
-            System.out.println("🌱 생성된 ID (SEQUENCE): " + m.getId());
+            for (int i=0; i<403; i++) {
+            	SequenceMember m = new SequenceMember("영희");
+            	em.persist(m);
+            	
+            	System.out.println("🌱 생성된 ID (SEQUENCE): " + m.getId());
+            }
+            
             tx.commit();
         } finally {
             em.close();
