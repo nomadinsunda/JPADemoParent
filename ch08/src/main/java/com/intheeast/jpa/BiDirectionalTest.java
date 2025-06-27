@@ -12,11 +12,11 @@ public class BiDirectionalTest {
             Persistence.createEntityManagerFactory("hello");
 
     public static void main(String[] args) {
-//        initData();                // 초기 데이터 저장
+    	persistParentWithChildAtBiDirection();                // 초기 데이터 저장
 //    	persistChildWhileParentIsTransient();
 //    	persistWithoutConvenienceMethod();
 //    	initWithoutSettingInverseSide();
-//        checkOrderLazyFetching();
+        checkOrderLazyFetching();
 //    	List<Long> listIds = prepareOrderItemsForPrint();
 //    	printTeamNamesForMemberIds(listIds);
     	
@@ -29,10 +29,9 @@ public class BiDirectionalTest {
 //        updateOrderItems();
 //        removeAndReAdd();
     	
-//    	initTestData();
-//    	printItem();
 //    	selectiveUpdateItem();
 //    	conditionalDeleteItem();
+//        makeOrderItemForTestingappendNewItems();
 //    	appendNewItems();
     	
     	List<Long> listIds = prepareOrderItemsForPrint();
@@ -44,17 +43,21 @@ public class BiDirectionalTest {
     }
 
     // 정상적인 부모 자식 관계 설정과 cascade 시연
-    private static void initData() {
+    private static void persistParentWithChildAtBiDirection() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
 
         try {
             tx.begin();
+            
+            OrderItem item1 = new OrderItem("모니터", 2);
+            
+            OrderItem item2 = new OrderItem("마우스", 1);
 
             Order order = new Order("이순신");
             
-            order.addItem(new OrderItem("모니터", 2));
-            order.addItem(new OrderItem("마우스", 1));
+            order.addItem(item1);
+            order.addItem(item2);
             
             // 다음 설정으로 인해 insert 쿼리가 즉시 db에게 전송됨
             // : db의 indentity로부터 id를 얻기 위해서...
@@ -63,6 +66,8 @@ public class BiDirectionalTest {
             // 부모 엔티티 클래스 인스턴스가 영속화 되면 자식 클래스 인스턴스도 영속화됨
             em.persist(order); // cascade에 의해 item도 함께 저장됨
 
+//            em.flush();
+            
             tx.commit();
         } finally {
             em.close();
@@ -86,6 +91,12 @@ public class BiDirectionalTest {
             item1.setOrder(order);
             order.addItem(item1);
             
+            // 부모가 영속 상태가 아닌데, 자식을 영속 상태로 지정하면서 발생한 예외!
+            // Caused by: org.hibernate.TransientPropertyValueException: 
+            // object references an unsaved transient instance 
+            // - save the transient instance before flushing : 
+            // com.intheeast.jpa.OrderItem.order -> com.intheeast.jpa.Order
+            //em.persist(order);
             em.persist(item1); // order가 아직 transient 상태이므로 외래키를 참조할 수 없음.           
 
             tx.commit();
@@ -156,14 +167,19 @@ public class BiDirectionalTest {
             OrderItem item1 = new OrderItem("SSD", 1);
             OrderItem item2 = new OrderItem("RAM", 2);
 
+            // 부모의 편의 메서드를 호출하지 않음
+//            order.addItem(item1);
+//            order.addItem(item2);
+            
             order.getOrderItems().add(item1);
             order.getOrderItems().add(item2);
 
-            // 주인 쪽 관계 미설정
+            // 부모-자식 관계 미설정
             // item1.setOrder(order); 
             // item2.setOrder(order);
 
-            em.persist(order); // cascade로 item 저장 시도됨
+            em.persist(order); // 자식 테이블의 row가 생성될 때 부모의 프라이머리 키인 외래키가 
+                               // 부모의 프라이머리 키인 외래키가 설정되지 않음
             tx.commit();
 
             System.out.println("# 편의 메서드 미사용 시: " + order.getOrderItems());
@@ -186,12 +202,13 @@ public class BiDirectionalTest {
 
             OrderItem item = new OrderItem("진라면", 1);
 
-            // 연관관계 주인만 설정 (비주인 역방향은 설정하지 않음)
+//            order.addItem(item);
+//            // 자식에게 부모가 누구인지를 설정
             item.setOrder(order);
 
             // ❌ order.getOrderItems().add(item); 는 생략됨
 
-            em.persist(order); 
+            em.persist(order); // 자식이 없기 때문에 cascade를 적용할 대상이 없음
             em.persist(item);
             
             em.flush();
@@ -255,6 +272,7 @@ public class BiDirectionalTest {
             // 연관관계 설정 (편의 메서드 사용)
             order1.addItem(item1);
             order1.addItem(item2);
+            
             order2.addItem(item3);
             order2.addItem(item4);
 
@@ -333,6 +351,7 @@ public class BiDirectionalTest {
 	            // 이미 1차 캐시에 OrderItem 엔티티 클래스 인스턴스가 있는데도 Select 쿼리 나감.
 	            // :1차 캐시는 엔티티 단위로만 존재할 뿐, 객체 그래프까지 자동 연결하지는 않음
 	            //  즉, JPA는 양방향 연관관계를 자동으로 역추적하지 않습니다
+	            //  ! 그러므로 다음과 같은 코드를 불필요하게 사용하지 마세요
 	            for (OrderItem orderItem : order.getOrderItems()) {
 	                System.out.printf("          멤버 ID:%d, 멤버 이름:%S", orderItem.getId(), orderItem.getProduct());
 	                System.out.println("\n");
@@ -364,6 +383,19 @@ public class BiDirectionalTest {
                             .setMaxResults(1)
                             .getSingleResult();
 
+            /*
+             select
+        		orderitems0_.order_id as order_id4_0_0_,
+        		orderitems0_.id as id1_0_0_,
+        		orderitems0_.id as id1_0_1_,
+        		orderitems0_.order_id as order_id4_0_1_,
+        		orderitems0_.product as product2_0_1_,
+        		orderitems0_.quantity as quantity3_0_1_ 
+    		 from
+        		OrderItem orderitems0_ 
+    		 where
+        		orderitems0_.order_id=? // 사실 order id가 하나(1L) 밖에 없음
+             */
             OrderItem removed = order.getOrderItems().get(0);
             order.removeItem(removed); // orphanRemoval = true → 자동 삭제
 
@@ -383,18 +415,25 @@ public class BiDirectionalTest {
             System.out.println("\n🧪 [연관관계 변경 테스트]");
 
             Order newOrder = new Order("장보고");
-            em.persist(newOrder);
+            //em.persist(newOrder);
 
             OrderItem item = em.createQuery("select i from OrderItem i", OrderItem.class)
                                .setMaxResults(1)
                                .getSingleResult();
 
+            System.out.println("OrderItem : " + item.toString());
+            
             // 기존 연관관계 제거
             item.getOrder().removeItem(item);
+            
+            OrderItem newItem = 
+            		new OrderItem(item.getProduct(), item.getQuantity());
 
             // 새 연관관계 설정
-            newOrder.addItem(item);  // 연관관계 편의 메서드로 양방향 유지
+            newOrder.addItem(newItem);  // 연관관계 편의 메서드로 양방향 유지
 
+            em.persist(newOrder);
+            
             tx.commit();
         } finally {
             em.close();
@@ -461,6 +500,7 @@ public class BiDirectionalTest {
             order.addItem(new OrderItem("키보드", 1));
             order.addItem(new OrderItem("마우스", 2));
             order.addItem(new OrderItem("모니터", 1));
+            order.addItem(new OrderItem("HDD", 1));
 
             em.persist(order);  // cascade: OrderItem도 함께 저장
 
@@ -470,7 +510,7 @@ public class BiDirectionalTest {
         }
     }
     
-    // 변경 감지 테스트 (수량 변경)
+    // Dirty checking 테스트 (수량 변경)
     private static void updateOrderItems() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -518,45 +558,8 @@ public class BiDirectionalTest {
         }
     }
     
-    public static void initTestData() {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-
-        try {
-            tx.begin();
-
-            Order order = new Order("김지철");
-            order.addItem(new OrderItem("RAM", 2));
-            order.addItem(new OrderItem("SSD", 1));
-            order.addItem(new OrderItem("HDD", 3));
-            order.addItem(new OrderItem("Mouse", 1));
-
-            em.persist(order); // CascadeType.ALL + 편의 메서드로 아이템까지 자동 저장
-
-            tx.commit();
-
-        } finally {
-            em.close();
-        }
-    }
-    
-    private static void printItem() {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-
-            Order order = em.find(Order.class, 1L);
-            for (OrderItem item : order.getOrderItems()) {
-                System.out.println("Item:" + item);
-
-            }
-            tx.commit();
-        } finally {
-            em.close();
-        }
-    }
-    
+        
+       
     private static void selectiveUpdateItem() {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -564,9 +567,15 @@ public class BiDirectionalTest {
             tx.begin();
 
             Order order = em.find(Order.class, 1L);
+            // orderItems 컬렉션
+            // 컬렉션을 통해 스트림을 생성
             order.getOrderItems().stream()
+                    // 필터링 : OrderItem의 필드 product의 이름이 'HDD'인 엘리먼트만,
                     .filter(item -> item.getProduct().equals("HDD"))
+                    // 필터링 결과중에, 가장 작은 인덱스 값을 가지는 엘리먼트만
                     .findFirst()
+                    // 만약 이러한 조건에 부합하는 엘리먼트가 있다면
+                    // 다음 람다식을 적용함.
                     .ifPresent(item -> item.setQuantity(item.getQuantity() + 1));
 
             tx.commit();
@@ -586,12 +595,38 @@ public class BiDirectionalTest {
             Order order = em.find(Order.class, 1L);
             List<OrderItem> toRemove = order.getOrderItems().stream()
                     .filter(item -> item.getQuantity() <= 1)
+                    // filter 연산 결과에 부합하는 스트림 엘리먼트들을 
+                    // 리스트 컬렉션으로 제공함.
                     .toList();
 
             toRemove.forEach(order::removeItem); // orphanRemoval로 DB에서도 삭제됨
 
             tx.commit();
             System.out.println("수량 1 이하인 상품 삭제 완료");
+        } finally {
+            em.close();
+        }
+    }
+    
+    private static void makeOrderItemForTestingappendNewItems() {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            Order order = new Order("김지영");
+
+            OrderItem item1 = new OrderItem("그래픽카드", 1);
+            OrderItem item2 = new OrderItem("CPU", 2);
+
+            // 부모의 편의 메서드를 호출하지 않음
+            order.addItem(item1);
+            order.addItem(item2);            
+            
+            em.persist(order); 
+            tx.commit();            
+
         } finally {
             em.close();
         }
@@ -625,9 +660,12 @@ public class BiDirectionalTest {
             tx.begin();
 
             // 기존 Order 엔티티 조회 (이름으로 조회 또는 ID 기반으로 해도 됨)
-            TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", Order.class);
+            TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", 
+            		                      Order.class);
             Order devTeam = query.setParameter("name", "개발팀").getSingleResult();
-            Order designTeam = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", Order.class)
+            
+            Order designTeam = em.createQuery("SELECT o FROM Order o WHERE o.customer = :name", 
+            		               Order.class)
                                   .setParameter("name", "디자인팀")
                                   .getSingleResult();
 
@@ -640,6 +678,7 @@ public class BiDirectionalTest {
             // 연관관계 설정 (편의 메서드 사용)
             devTeam.addItem(item5);
             devTeam.addItem(item6);
+            
             designTeam.addItem(item7);
             designTeam.addItem(item8);
 
@@ -709,7 +748,8 @@ public class BiDirectionalTest {
 
             // 삭제 후 확인
             em = emf.createEntityManager(); // 새 EntityManager로 쿼리 실행
-            Long count = em.createQuery("SELECT COUNT(o) FROM OrderItem o WHERE o.order.id = :orderId", Long.class)
+            Long count = em.createQuery("SELECT COUNT(o) FROM OrderItem o WHERE o.order.id = :orderId", 
+            						Long.class)
                            .setParameter("orderId", orderId)
                            .getSingleResult();
 

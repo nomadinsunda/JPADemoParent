@@ -21,13 +21,15 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, 
 	generator = "order_seq_generator")
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String customer;
 
     // mappedBy 속성을 설정했다는 것은 
     // 내가 owner가 아니라 owner의 반대편(inverse side)이다.
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, 
+    		orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order(String customer) {
@@ -46,7 +48,8 @@ public class Order {
     public void addItem(OrderItem item) {
         orderItems.add(item);
         ///////////////////////////////////////
-        item.setOrder(this); // 연관관계 주인 쪽 설정 : 이 설정을 하지 않으면, OrderItem의 ORDER_ID가 NULL 설정됨.
+        item.setOrder(this); // 연관관계 주인 쪽 설정 : 이 설정을 하지 않으면, 
+        //                      OrderItem의 ORDER_ID가 NULL 설정됨.
         ///////////////////////////////////////
     }
     

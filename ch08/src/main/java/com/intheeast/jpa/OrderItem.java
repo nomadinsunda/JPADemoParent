@@ -20,6 +20,7 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, 
 	generator = "orderitem_seq_generator")
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String product;

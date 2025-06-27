@@ -5,7 +5,8 @@ import java.util.List;
 
 public class ManyToManyBiDirectionalTest {
 
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+    private static final EntityManagerFactory emf = 
+    		Persistence.createEntityManagerFactory("hello");
 
     public static void main(String[] args) {
         saveTest();             // 연관관계 저장 테스트
@@ -70,6 +71,20 @@ public class ManyToManyBiDirectionalTest {
 
             for (Student s : students) {
                 System.out.println("👨‍🎓 학생: " + s.getName());
+                /*
+                 select
+        			courses0_.student_id as student_1_2_0_,
+        			courses0_.course_id as course_i2_2_0_,
+        			course1_.id as id1_0_1_,
+        			course1_.name as name2_0_1_ 
+    			 from
+        			student_course courses0_ 
+    			 inner join
+                    Course course1_ 
+            			on courses0_.course_id=course1_.id 
+    			  where
+        			courses0_.student_id=?
+                 */
                 for (Course c : s.getCourses()) {
                     System.out.println("   📘 수강과목: " + c.getName());
                 }
@@ -103,6 +118,10 @@ public class ManyToManyBiDirectionalTest {
                                 .getSingleResult();
 
             // 수강 과목 하나 제거
+            
+            ////////////////////////////////////////////////////////
+            // 학생이 몇 개의 과목을 수강한지가 중요한 것이 아니라,
+            // 단지 한 과목만 삭제하기 위해서 for looping을 할 필요가 없기 때문에!!!
             Course toRemove = student.getCourses().iterator().next();
 
             // 양방향 연관관계 해제
