@@ -10,7 +10,7 @@ public class ManyToManyBiDirectionalTest {
 
     public static void main(String[] args) {
         saveTest();             // 연관관계 저장 테스트
-        queryTest();            // 양방향 탐색 테스트
+//        queryTest();            // 양방향 탐색 테스트
         deleteRelationTest();   // 관계 제거 및 삭제 테스트
 
         emf.close();
@@ -40,9 +40,9 @@ public class ManyToManyBiDirectionalTest {
 
             // 연관관계 설정 (양방향)
             student1.addCourse(course1);
-            student1.addCourse(course2);
-
-            student2.addCourse(course1);
+//            student1.addCourse(course2);
+//
+//            student2.addCourse(course1);
 
             // 저장 (양방향 ManyToMany는 주인 엔티티만 저장해도 관계가 저장됨)
             em.persist(student1);
@@ -67,37 +67,62 @@ public class ManyToManyBiDirectionalTest {
         EntityManager em = emf.createEntityManager();
 
         try {
-            List<Student> students = em.createQuery("select s from Student s", Student.class).getResultList();
-
-            for (Student s : students) {
-                System.out.println("👨‍🎓 학생: " + s.getName());
-                /*
-                 select
-        			courses0_.student_id as student_1_2_0_,
-        			courses0_.course_id as course_i2_2_0_,
-        			course1_.id as id1_0_1_,
-        			course1_.name as name2_0_1_ 
-    			 from
-        			student_course courses0_ 
-    			 inner join
-                    Course course1_ 
-            			on courses0_.course_id=course1_.id 
-    			  where
-        			courses0_.student_id=?
-                 */
-                for (Course c : s.getCourses()) {
-                    System.out.println("   📘 수강과목: " + c.getName());
-                }
-            }
+//            List<Student> students = em.createQuery("select s from Student s", Student.class).getResultList();
+//
+//            System.out.println("*************************************************");
+//            for (Student s : students) {
+//                System.out.println("👨‍🎓 학생: " + s.getName());
+//                                
+//                // s.getCourses()
+//                /*
+//                 select
+//        			courses0_.student_id as student_1_2_0_,
+//        			courses0_.course_id as course_i2_2_0_,
+//        			course1_.id as id1_0_1_,
+//        			course1_.name as name2_0_1_ 
+//    			 from
+//        			student_course courses0_ 
+//    			 inner join
+//                    Course course1_ 
+//            			on courses0_.course_id=course1_.id 
+//    			  where
+//        			courses0_.student_id=?
+//                 */
+//                System.out.println("##############################################");
+//                for (Course c : s.getCourses()) {
+//                    System.out.println("   📘 수강과목: " + c.getName());
+//                }
+//            }
+//            System.out.println("*************************************************");
 
             List<Course> courses = em.createQuery("select c from Course c", Course.class).getResultList();
 
+            
+            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
             for (Course c : courses) {
                 System.out.println("📘 과목: " + c.getName());
+                System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6");
+                
+                // c.getStudents()
+                /*
+                 select
+			        students0_.course_id as course_i2_2_0_,
+			        students0_.student_id as student_1_2_0_,
+			        student1_.id as id1_1_1_,
+			        student1_.name as name2_1_1_ 
+			    from
+			        student_course students0_ 
+			    inner join
+			        Student student1_ 
+			            on students0_.student_id=student1_.id 
+			    where
+			        students0_.course_id=?
+                 */
                 for (Student s : c.getStudents()) {
                     System.out.println("   👨‍🎓 수강생: " + s.getName());
                 }
             }
+            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 
         } finally {
             em.close();

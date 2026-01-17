@@ -2,7 +2,7 @@ package com.intheeast.jpa;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +33,7 @@ public class Order {
         quantity integer not null,
         order_id bigint,
         primary key (id)
-     )
-     
+     )     
      alter table OrderItem 
        add constraint FK8n4q55qxr4ox0kltr6nb9pa2h 
        foreign key (order_id) 

@@ -2,13 +2,15 @@ package com.intheeast.jpa;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
+@Setter
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class Product {
+@Table(name="orders")
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +20,7 @@ public class Product {
 
     private int price;
 
-    public Product(String name, int price) {
+    public Order(String name, int price) {
         this.name = name;
         this.price = price;
     }

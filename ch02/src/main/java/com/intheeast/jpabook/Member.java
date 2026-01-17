@@ -1,7 +1,6 @@
 package com.intheeast.jpabook;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Member {

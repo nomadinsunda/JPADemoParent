@@ -2,14 +2,14 @@ package com.intheeast.jpa;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
 @Table(name = "ORDERS")
 @SequenceGenerator(
 	    name = "order_seq_generator",
-	    sequenceName = "order_seq", // DB 시퀀스 이름
+	    sequenceName = "order_seq", // H2 DB 시퀀스 이름
 	    initialValue = 1,
 	    allocationSize = 100
 	)
@@ -20,7 +20,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, 
-	generator = "order_seq_generator")
+		generator = "order_seq_generator")
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

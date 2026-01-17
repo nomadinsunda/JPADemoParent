@@ -2,7 +2,7 @@ package com.intheeast.jpa;
 
 import java.util.List;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 public class OneToManyUniDirectionalTest {

@@ -1,12 +1,12 @@
 package com.intheeast.jpabook;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
-public class HelloJpa {
-	
-	
+public class HelloJpa {	
 
     public static void main(String[] args) {
+    	Object obj;
+    	System.out.println("hello JPA");
         // 1. EntityManagerFactory 생성 (persistence.xml에 정의된 이름 사용)
         EntityManagerFactory emf = 
         		Persistence.createEntityManagerFactory("hello");
@@ -30,8 +30,8 @@ public class HelloJpa {
             em.persist(member);  // INSERT 발생
 
             // === 조회 ===
-            Member findMember = em.find(Member.class, 1L);
-            System.out.println("조회된 이름: " + findMember.getName());
+            //Member findMember = em.find(Member.class, 1L);
+            //System.out.println("조회된 이름: " + findMember.getName());
 
             tx.commit(); // 트랜잭션 커밋
         } catch (Exception e) {

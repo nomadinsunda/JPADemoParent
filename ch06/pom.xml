@@ -16,17 +16,18 @@
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 	<!-- JPA, 하이버네이트 버전 -->
-	<hibernate.version>5.6.15.Final</hibernate.version>
+	<hibernate.version>6.6.36.Final</hibernate.version>
 	<!-- 데이터베이스 버전 -->
 	<h2db.version>2.2.224</h2db.version>
   </properties>
 
-  <dependencies>
+  <dependencies> 	
   	
-    <dependency>
-	  <groupId>org.hibernate</groupId>
-	  <artifactId>hibernate-entitymanager</artifactId>
-	  <version>${hibernate.version}</version>
+	<dependency>
+    	<groupId>org.hibernate</groupId>
+    	<artifactId>hibernate-core</artifactId>
+    	<version>${hibernate.version}</version>
+    	<!-- <type>pom</type> -->
 	</dependency>
 		<!-- H2 데이터베이스 -->
 	<dependency>
@@ -35,12 +36,35 @@
 	  <version>${h2db.version}</version>
 	</dependency>
 	
+	<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 	<dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.32</version>
-        <scope>provided</scope>
-    </dependency>
+	    <groupId>org.projectlombok</groupId>
+	    <artifactId>lombok</artifactId>
+	    <version>1.18.38</version>
+	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>2.0.17</version>
+	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>1.5.21</version>
+	    <scope>compile</scope>
+	</dependency>
 		
   </dependencies>
+  
+  <build>
+  	<resources>
+    	<resource>
+      		<directory>src/main/resources</directory>
+    	</resource>
+  	</resources>
+  </build>
 </project>

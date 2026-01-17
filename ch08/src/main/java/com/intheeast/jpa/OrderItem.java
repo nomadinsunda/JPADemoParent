@@ -3,7 +3,7 @@ package com.intheeast.jpa;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @SequenceGenerator(
@@ -19,7 +19,7 @@ public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, 
-	generator = "orderitem_seq_generator")
+				   generator = "orderitem_seq_generator")
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

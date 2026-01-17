@@ -13,7 +13,8 @@ import lombok.*;
 @Entity
 public class Student {
 
-    @Id @GeneratedValue
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;

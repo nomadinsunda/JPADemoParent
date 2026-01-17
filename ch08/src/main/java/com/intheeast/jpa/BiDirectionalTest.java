@@ -1,7 +1,7 @@
 package com.intheeast.jpa;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,12 @@ public class BiDirectionalTest {
             Persistence.createEntityManagerFactory("hello");
 
     public static void main(String[] args) {
-    	persistParentWithChildAtBiDirection();                // 초기 데이터 저장
+    	make100Orders();
+//    	persistParentWithChildAtBiDirection();                // 초기 데이터 저장
 //    	persistChildWhileParentIsTransient();
 //    	persistWithoutConvenienceMethod();
 //    	initWithoutSettingInverseSide();
-        checkOrderLazyFetching();
+//        checkOrderLazyFetching();
 //    	List<Long> listIds = prepareOrderItemsForPrint();
 //    	printTeamNamesForMemberIds(listIds);
     	
@@ -34,12 +35,36 @@ public class BiDirectionalTest {
 //        makeOrderItemForTestingappendNewItems();
 //    	appendNewItems();
     	
-    	List<Long> listIds = prepareOrderItemsForPrint();
+//    	List<Long> listIds = prepareOrderItemsForPrint();
 //    	addMoreOrderItemsToExistingOrders();
 //    	verifyOrderItemsInDatabase();
     	
-    	deleteOrderAndCascadeItems("디자인팀");
+//    	deleteOrderAndCascadeItems("디자인팀");
         emf.close();
+    }
+    
+    public static void make100Orders() {
+    	EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            
+            for (int i=0; i<10; i++) {
+            	System.out.println("check sequence");
+            	for (int j=0; j<100; j++) {
+            		String customer = "customer" + j;
+            		Order order = new Order(customer);
+            		em.persist(order);
+            	}
+            }
+            
+            tx.commit();
+        } catch (Exception e) {
+        	
+        } finally {
+        	em.close();
+        }
     }
 
     // 정상적인 부모 자식 관계 설정과 cascade 시연

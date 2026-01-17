@@ -22,6 +22,10 @@ public class Passport {
     private Long id;
 
     private String number;
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", unique = true) // FK 이름을 person_id로 설정
+    private Person person;
 
     // Constructors    
     public Passport(String number) {
