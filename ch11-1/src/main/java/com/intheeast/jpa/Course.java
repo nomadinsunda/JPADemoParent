@@ -1,22 +1,22 @@
 package com.intheeast.jpa;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.*;
-import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "course")
 public class Course {
 
-    @Id
+    @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -25,11 +25,11 @@ public class Course {
     private String professorName;  // 담당 교수
     private int credit;            // 학점
     private int capacity;          // 수강 정원
-
+    
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<Enrollment> enrollments = new ArrayList<>();
+    @ManyToMany(mappedBy = "courses")
+    private Set<Student> students = new HashSet<>();
 
-    // getter, setter 생략
+    // getter, setter
 }

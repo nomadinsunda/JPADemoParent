@@ -17,7 +17,7 @@ public class Main {
         // [1] 데이터 대량 삽입 (10만 건)
         em.getTransaction().begin();
         System.out.println("💾 데이터 삽입 중...");
-        for (int i = 0; i < 100_000; i++) {
+        for (int i = 0; i < 1_000_000; i++) {
             String email = "user" + i + "@example.com";
             String name = "User" + i;
             String phone = "010-" + (1000 + random.nextInt(9000)) + "-" + (1000 + random.nextInt(9000));
@@ -28,7 +28,7 @@ public class Main {
             em.persist(new User(email, name, phone, city, job, birth));
 
             if (i % 1000 == 0) {
-                em.flush();
+                em.flush();  // 이 부분에서 배치 처리가 수행됨.
                 em.clear();
             }
         }
@@ -76,7 +76,8 @@ public class Main {
               .getResultList();
             
             long end = System.nanoTime();
-            totalDuration += (end - start);
+            totalDuration += (end - start);         
+            
         }
 
         // 나노초를 밀리초로 변환하여 평균 산출

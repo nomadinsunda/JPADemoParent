@@ -9,8 +9,7 @@ import jakarta.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-@Table(name="orders")
-public class Order {
+public class Department {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +17,10 @@ public class Order {
 
     private String name;
 
-    private int price;
+    private int employeeCounts;
 
-    public Order(String name, int price) {
+    public Department(String name, int employeeCounts) {
         this.name = name;
-        this.price = price;
+        this.employeeCounts = employeeCounts;
     }
 }

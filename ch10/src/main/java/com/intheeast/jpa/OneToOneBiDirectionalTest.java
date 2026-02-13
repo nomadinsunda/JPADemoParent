@@ -87,8 +87,12 @@ public class OneToOneBiDirectionalTest {
         try {
             tx.begin();
 
+            // JPQL !
+            // Transactional Write Behind에 캐싱되지 않음
+            // select ...
             User user = em.createQuery("select c from User c", User.class)
                                 .getSingleResult();
+            
             em.remove(user); // userprofile도 함께 삭제되어야 함
 
             tx.commit();
