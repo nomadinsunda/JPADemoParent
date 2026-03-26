@@ -9,10 +9,11 @@ public class ManyToOneBiDirectionalTest {
             Persistence.createEntityManagerFactory("hello");
 
     public static void main(String[] args) {
-        initData();
-        testChangeProduct();
+//        initData();
+//        testChangeProduct();
 //        testLazyLoading();
 //        testNPlusOneProblem();
+        triggerNPlusOne();
 //        testNPlusOneProblemSolvedWithFetchJoin();
 //        testForeignKeyConstraint();
 //        testChangeProduct();
@@ -63,6 +64,48 @@ public class ManyToOneBiDirectionalTest {
         } finally {
             em.close();
         }
+    }
+    
+    private static void triggerNPlusOne() {
+
+    	EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            
+            for (int i = 0; i < 3; i++) {
+                Order order = new Order("Order " + i, 1000 * i);
+                order.addOrderItem(new OrderItem()); 
+                order.addOrderItem(new OrderItem());
+                order.addOrderItem(new OrderItem());
+                order.addOrderItem(new OrderItem());
+
+                em.persist(order);
+            }
+            
+            tx.commit();
+            
+//            em.flush();
+            em.clear();
+
+            System.out.println("--- 조회 시작 ---");
+            
+            // 2. 모든 Order 조회 (N+1 발생 지점)
+            // findAll()은 내부적으로 'select o from Order o' 라는 JPQL을 실행합니다.
+            List<Order> orders = em.createQuery("select o from Order o", Order.class)
+                                   .getResultList();
+
+            System.out.println("조회된 주문 수: " + orders.size());
+            
+            // 3. EAGER 설정으로 인해 위 getResultList() 호출 시점에 
+            // 각 Order의 OrderItem을 가져오기 위한 추가 쿼리가 Order 개수만큼 나갑니다.
+            
+        } catch(Exception e) {
+        	
+        } finally {
+        	em.close();
+        }
+    	
     }
     
     
