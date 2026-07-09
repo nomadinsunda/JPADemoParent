@@ -4,6 +4,7 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
              https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
 
+  <!-- EntityManager Factory!! -->
   <persistence-unit name="hello"> 
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />

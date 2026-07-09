@@ -3,14 +3,18 @@ package com.intheeast.jpabook;
 import jakarta.persistence.*;
 
 public class JpaLifecycleMain {
-	
-	// transactional write behid queue!!!
+	// Entity Manager가 관리한다.
+	// Persistence Context
+	//   -1차 캐시: 엔티티 클래스 인스턴스들을 관리하고 있는 역할)
+	//   -Transactional Write Behind Queue queue!!!
 	public static void addPersons(EntityManager em) {
 		
 		EntityTransaction et = em.getTransaction();
 		et.begin();
 		
 		try {		
+			// 각각의 Person[Entity 클래스] 인스턴스는 person 테이블의 단일 row들과 매핑되어야 함...
+			// : 물론 persist 메서드를 통해 영속화가 되어야 함
 			Person p1 = new Person(1L, "kim", "0100000000");
 			Person p2 = new Person(2L, "kim", "0100000000");
 			Person p3 = new Person(3L, "kim", "0100000000");
@@ -20,14 +24,16 @@ public class JpaLifecycleMain {
 			Person p7 = new Person(7L, "kim", "0100000000");
 			Person p8 = new Person(8L, "kim", "0100000000");
 			
-			em.persist(p1);		// insert p1
-			em.persist(p2);		// insert p2
-			em.persist(p3);		// insert p3
-			em.persist(p4);		// insert p4
-			em.persist(p5);		// insert p5
-			em.persist(p6);		// insert p6
-			em.persist(p7);		// insert p7
-			em.persist(p8);		// insert p8
+			// 엔티티 클래스 인스턴스만 만들면 아무 의미없음.
+			// 엔티티매니저의 persist 메서드에게 엔티티 클래스 인스턴스 생성을 알려야 함
+			em.persist(p1);		// insert query p1-TWB queue
+			em.persist(p2);		// insert query p2-TWB queue
+			em.persist(p3);		// insert query p3-TWB queue
+			em.persist(p4);		// insert query p4-TWB queue
+			em.persist(p5);		// insert query p5-TWB queue
+			em.persist(p6);		// insert query p6-TWB queue
+			em.persist(p7);		// insert query p7-TWB queue
+			em.persist(p8);		// insert query p8-TWB queue
 			// 총 8개의 insert 쿼리가 transactional write behid queue에 큐잉됨
 			
 			// Synchronize the persistence context to the underlying database.
