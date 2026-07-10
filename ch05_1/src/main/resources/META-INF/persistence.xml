@@ -21,7 +21,7 @@
             <!-- 하이버네이트 6 버전부터는 PostgreSQLDialect 하나로 구형/신형 버전 문법이 자동 통합 처리됩니다 -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
 
-            <property name="hibernate.id.optimizer.pooled.preferred" value="pooled-lo"/>
+            <property name="hibernate.id.optimizer.pooled.preferred" value="pooled-lo"/> 
 
             <!-- 3. SQL 출력 및 포맷팅 옵션 (디버깅용) -->
             <property name="hibernate.show_sql" value="true" />
