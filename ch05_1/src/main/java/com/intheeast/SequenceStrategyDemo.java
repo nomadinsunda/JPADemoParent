@@ -1,6 +1,6 @@
 package com.intheeast;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 public class SequenceStrategyDemo {
     public static void main(String[] args) {
@@ -10,7 +10,7 @@ public class SequenceStrategyDemo {
 
         try {
             tx.begin();
-            for (int i=0; i<403; i++) {
+            for (int i=0; i<100; i++) {
             	SequenceMember m = new SequenceMember("영희");
             	em.persist(m);
             	

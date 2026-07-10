@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
+    <!-- 영속성 유닛 이름은 자유롭게 설정 가능합니다 (예: hello) -->
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 1. PostgreSQL 데이터베이스 연결 설정 -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.user" value="postgres"/> <!-- 💡 본인의 PostgreSQL 계정명 (기본값: postgres) -->
+            <property name="jakarta.persistence.jdbc.password" value="1234"/> <!-- 💡 본인의 비밀번호 -->
+            
+            <!-- 💡 localhost:5432/ 뒤의 'hello'를 실제 생성하신 PostgreSQL 데이터베이스 이름으로 변경하세요 -->
+            <!-- 💡 logger=org.postgresql.Driver&loglevel=2 옵션은 드라이버 레벨에서 쿼리 소요 시간과 내부 통신을 로깅합니다 -->
+            <property name="jakarta.persistence.jdbc.url" 
+                      value="jdbc:postgresql://localhost:5432/hello?logger=org.postgresql.Driver&amp;loglevel=2"/>
+
+            <!-- 2. 하이버네이트 방언(Dialect) 설정 -->
+            <!-- 하이버네이트 6 버전부터는 PostgreSQLDialect 하나로 구형/신형 버전 문법이 자동 통합 처리됩니다 -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+
+            <property name="hibernate.id.optimizer.pooled.preferred" value="pooled-lo"/>
+
+            <!-- 3. SQL 출력 및 포맷팅 옵션 (디버깅용) -->
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.use_sql_comments" value="true" />
+            <property name="hibernate.generate_statistics" value="true" />
+
+            <!-- 4. 테이블 자동 생성 옵션 -->
+            <!-- 애플리케이션 시작 시 기존 테이블/시퀀스를 드롭하고 엔티티 기준으로 새로 만듭니다 (개발 환경용) -->
+            <property name="hibernate.hbm2ddl.auto" value="create" />
+            
+            <!-- 하이버네이트 6 표준 시퀀스 매핑 성능 최적화 엔진 활성화 -->
+            <property name="hibernate.id.new_generator_mappings" value="true" />
+
+        </properties>
+    </persistence-unit>
+</persistence>

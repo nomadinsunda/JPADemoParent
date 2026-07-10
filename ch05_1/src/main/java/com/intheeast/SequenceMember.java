@@ -1,10 +1,10 @@
 package com.intheeast;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 
 import lombok.*;
 
@@ -15,7 +15,7 @@ import lombok.*;
     name = "member_seq_generator",
     sequenceName = "member_seq", // DB 시퀀스 이름
     initialValue = 1,
-    allocationSize = 100
+    allocationSize = 50
 )
 public class SequenceMember {
 

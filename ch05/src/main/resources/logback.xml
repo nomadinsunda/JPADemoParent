@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 1. 콘솔(Console) 출력 형식 정의 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 2. 하이버네이트 자동 생성 키(IDENTITY PK) 추출 추적 설정 (최신화) -->
+    <logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="TRACE"/>
+    
+    <!-- 🔄 [변경완료] 하이버네이트 6.x 전용 식별자 생성 및 추출 엔진 추적 -->
+    <logger name="org.hibernate.id.insert" level="TRACE"/>
+
+    <!-- 3. 하이버네이트 SQL 파라미터 및 결과 매핑 추적 설정 (최신화) -->
+    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+    
+    <!-- 🔄 [변경완료] DB 결과셋(ResultSet)에서 값을 추출(Extract)하는 하이버네이트 6 전용 로거 -->
+    <logger name="org.hibernate.orm.jdbc.extract" level="TRACE"/>
+
+    <!-- 4. 전체 프로젝트 기본 로그 레벨 설정 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

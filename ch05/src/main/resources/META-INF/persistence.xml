@@ -6,18 +6,25 @@
         <properties>
 
             <!-- 필수 속성 -->
-            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="javax.persistence.jdbc.user" value="sa"/>
-            <property name="javax.persistence.jdbc.password" value=""/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="1234"/>
+            
+            <property name="jakarta.persistence.jdbc.url" 
+          		value="jdbc:mysql://localhost:3306/testdb?serverTimezone=UTC&amp;logger=com.mysql.cj.log.StandardLogger&amp;profileSQL=true"/>
+            
+            <!-- SQL 문법 강조 (가독성 향상) -->
+            <property name="hibernate.highlight_sql" value="true" /> 
+            <!-- 하이버네이트 내부 타입 처리 과정을 trace 수준으로 로깅 -->
+			<property name="hibernate.type" value="trace" /> 
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
 
             <!-- 옵션 -->
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.use_sql_comments" value="true" />
             <property name="hibernate.id.new_generator_mappings" value="true" />
-            <property name="hibernate.hbm2ddl.auto" value="create" />
+            <property name="hibernate.hbm2ddl.auto" value="create" />            
             
             <!-- 기본 매핑 이름 -->
             <property name="hibernate.generate_statistics" value="true" />

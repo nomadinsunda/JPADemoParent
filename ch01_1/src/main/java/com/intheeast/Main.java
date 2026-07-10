@@ -55,7 +55,6 @@ public class Main {
 			Student student1 = em.find(Student.class, 1L);
 			Student student2 = em.find(Student.class, 2L);
 			Student student3 = em.find(Student.class, 3L);
-
 			
 			et.commit();
 		} catch(Exception e) {
